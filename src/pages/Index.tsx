@@ -53,8 +53,15 @@ const Index = () => {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 animate-scale-in">
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Fitness Background Images */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-0 w-1/3 h-1/2 bg-cover bg-center" style={{backgroundImage: 'url(https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)'}}></div>
+          <div className="absolute top-0 right-0 w-1/3 h-1/2 bg-cover bg-center" style={{backgroundImage: 'url(https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)'}}></div>
+          <div className="absolute bottom-0 left-1/4 w-1/2 h-1/2 bg-cover bg-center" style={{backgroundImage: 'url(https://images.unsplash.com/photo-1574680096145-d05b474e2155?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80)'}}></div>
+        </div>
+        
+        <Card className="w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 animate-scale-in relative z-10">
           <CardHeader className="text-center">
             <Trophy className="w-16 h-16 mx-auto text-yellow-400 mb-4 animate-bounce" />
             <CardTitle className="text-2xl text-white">Assessment Complete!</CardTitle>
@@ -83,11 +90,20 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 relative overflow-hidden">
+      {/* Fitness Background Images */}
+      <div className="absolute inset-0 opacity-15">
+        <div className="absolute top-10 left-10 w-64 h-64 bg-cover bg-center rounded-full animate-pulse" style={{backgroundImage: 'url(https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)', animationDelay: '1s'}}></div>
+        <div className="absolute top-20 right-16 w-48 h-48 bg-cover bg-center rounded-lg animate-pulse" style={{backgroundImage: 'url(https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)', animationDelay: '2s'}}></div>
+        <div className="absolute bottom-32 left-20 w-56 h-40 bg-cover bg-center rounded-xl animate-pulse" style={{backgroundImage: 'url(https://images.unsplash.com/photo-1574680096145-d05b474e2155?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80)', animationDelay: '3s'}}></div>
+        <div className="absolute bottom-20 right-12 w-72 h-48 bg-cover bg-center rounded-2xl animate-pulse" style={{backgroundImage: 'url(https://images.unsplash.com/photo-1550345332-09e3ac987658?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2187&q=80)', animationDelay: '4s'}}></div>
+        <div className="absolute top-1/2 left-1/3 w-40 h-60 bg-cover bg-center rounded-lg animate-pulse" style={{backgroundImage: 'url(https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)', animationDelay: '5s'}}></div>
+      </div>
+
       {/* Hero Section */}
-      <div className="text-center py-12 animate-fade-in">
+      <div className="text-center py-12 animate-fade-in relative z-10">
         <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-          FITNESS ASSESSMENT
+          FITRONX
         </h1>
         <p className="text-xl text-gray-300 mb-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
           Know your Health status from your Fitness Standards
@@ -115,10 +131,10 @@ const Index = () => {
       </div>
 
       {/* Main Form */}
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto relative z-10">
         <Card className="bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl animate-scale-in">
           <CardHeader>
-            <CardTitle className="text-2xl text-white text-center">FITNESS TEST FORM</CardTitle>
+            <CardTitle className="text-2xl text-white text-center">FITRONX TEST FORM</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
