@@ -52,6 +52,20 @@ const Index = () => {
         fontWeight: '600'
       }
     });
+
+    // Add email notification
+    setTimeout(() => {
+      toast.success(`📧 Email sent successfully!`, {
+        duration: 3000,
+        style: {
+          background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)',
+          color: 'white',
+          border: 'none',
+          fontSize: '16px',
+          fontWeight: '600'
+        }
+      });
+    }, 1000);
   };
 
   const pickWinner = (e: React.MouseEvent) => {
