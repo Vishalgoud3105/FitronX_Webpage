@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/93415a1d-ae96-422d-b366-d2500e33dfdb
+**URL**: https://preview--fitronx.lovable.app/
 
 ## How can I edit this code?
 
@@ -10,7 +10,7 @@ There are several ways of editing your application.
 
 **Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/93415a1d-ae96-422d-b366-d2500e33dfdb) and start prompting.
+Simply visit the [FitronX.fit](https://fitronx.lovable.app/) and start prompting.
 
 Changes made via Lovable will be committed automatically to this repo.
 
