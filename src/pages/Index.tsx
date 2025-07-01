@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Activity, Heart, Trophy, Zap } from "lucide-react";
 
@@ -23,6 +23,9 @@ const Index = () => {
 
   const [currentSection, setCurrentSection] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [winners, setWinners] = useState<string[]>([]);
+  const [showWinnersDialog, setShowWinnersDialog] = useState(false);
+  const [celebrationEmojis, setCelebrationEmojis] = useState<{id: number, x: number, y: number}[]>([]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -35,13 +38,55 @@ const Index = () => {
     e.preventDefault();
     console.log('Form submitted:', formData);
     setIsSubmitted(true);
-    toast.success("Fitness assessment submitted successfully!");
+    
+    // Generate random reps between 10-50
+    const totalReps = Math.floor(Math.random() * 41) + 10;
+    
+    toast.success(`🎉 Workout data saved successfully. Total Reps: ${totalReps}`, {
+      duration: 4000,
+      style: {
+        background: 'linear-gradient(135deg, #10b981, #3b82f6)',
+        color: 'white',
+        border: 'none',
+        fontSize: '16px',
+        fontWeight: '600'
+      }
+    });
   };
 
-  const pickWinner = () => {
+  const pickWinner = (e: React.MouseEvent) => {
     const workouts = ['Bicep Curls', 'Squats', 'Pushups', 'Plank'];
     const randomWorkout = workouts[Math.floor(Math.random() * workouts.length)];
-    toast.success(`Winner: ${randomWorkout}! This is your recommended workout.`);
+    
+    // Add to winners list
+    setWinners(prev => [...prev, randomWorkout]);
+    
+    // Create celebration emojis
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    const newEmojis = Array.from({length: 8}, (_, i) => ({
+      id: Date.now() + i,
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2
+    }));
+    
+    setCelebrationEmojis(newEmojis);
+    
+    // Remove emojis after animation
+    setTimeout(() => setCelebrationEmojis([]), 2000);
+    
+    // Show winners dialog
+    setShowWinnersDialog(true);
+    
+    toast.success(`🎊 Congratulations! Winner: ${randomWorkout}!`, {
+      duration: 3000,
+      style: {
+        background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+        color: 'white',
+        border: 'none',
+        fontSize: '16px',
+        fontWeight: '600'
+      }
+    });
   };
 
   const sections = [
@@ -76,13 +121,37 @@ const Index = () => {
             >
               Take Another Assessment
             </Button>
-            <Button 
-              onClick={pickWinner}
-              variant="outline"
-              className="w-full border-white/30 text-white hover:bg-white/10 transition-all duration-300"
-            >
-              Get Workout Recommendation
-            </Button>
+            <Dialog open={showWinnersDialog} onOpenChange={setShowWinnersDialog}>
+              <DialogTrigger asChild>
+                <Button 
+                  onClick={pickWinner}
+                  className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold transition-all duration-300 transform hover:scale-105"
+                >
+                  Pick Winner
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-lg border border-white/20 text-white">
+                <DialogHeader>
+                  <DialogTitle className="text-center text-2xl">🏆 Winners List 🏆</DialogTitle>
+                  <DialogDescription className="text-center text-gray-300">
+                    Here are all your workout winners!
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3 max-h-60 overflow-y-auto">
+                  {winners.length === 0 ? (
+                    <p className="text-center text-gray-400">No winners yet! Click Pick Winner to start.</p>
+                  ) : (
+                    winners.map((winner, index) => (
+                      <div key={index} className="bg-white/10 rounded-lg p-3 flex items-center justify-between">
+                        <span className="font-medium">#{index + 1}</span>
+                        <span className="text-lg">{winner}</span>
+                        <span className="text-2xl">🎉</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
       </div>
@@ -91,6 +160,21 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 relative overflow-hidden">
+      {/* Celebration Emojis */}
+      {celebrationEmojis.map(emoji => (
+        <div
+          key={emoji.id}
+          className="fixed text-4xl animate-bounce pointer-events-none z-50"
+          style={{
+            left: emoji.x - 20 + Math.random() * 40,
+            top: emoji.y - 20 + Math.random() * 40,
+            animation: 'celebration 2s ease-out forwards'
+          }}
+        >
+          🎉
+        </div>
+      ))}
+
       {/* Fitness Background Images */}
       <div className="absolute inset-0 opacity-15">
         <div className="absolute top-10 left-10 w-64 h-64 bg-cover bg-center rounded-full animate-pulse" style={{backgroundImage: 'url(https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)', animationDelay: '1s'}}></div>
@@ -275,14 +359,38 @@ const Index = () => {
                 >
                   Submit
                 </Button>
-                <Button 
-                  type="button"
-                  onClick={pickWinner}
-                  variant="outline"
-                  className="flex-1 border-white/30 text-white hover:bg-white/10 font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105"
-                >
-                  Pick Winner
-                </Button>
+                <Dialog open={showWinnersDialog} onOpenChange={setShowWinnersDialog}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      type="button"
+                      onClick={pickWinner}
+                      className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105"
+                    >
+                      Pick Winner
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-lg border border-white/20 text-white">
+                    <DialogHeader>
+                      <DialogTitle className="text-center text-2xl">🏆 Winners List 🏆</DialogTitle>
+                      <DialogDescription className="text-center text-gray-300">
+                        Here are all your workout winners!
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                      {winners.length === 0 ? (
+                        <p className="text-center text-gray-400">No winners yet! Click Pick Winner to start.</p>
+                      ) : (
+                        winners.map((winner, index) => (
+                          <div key={index} className="bg-white/10 rounded-lg p-3 flex items-center justify-between">
+                            <span className="font-medium">#{index + 1}</span>
+                            <span className="text-lg">{winner}</span>
+                            <span className="text-2xl">🎉</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </form>
           </CardContent>
