@@ -199,7 +199,7 @@ const Index = () => {
                       value={formData.height}
                       onChange={(e) => handleInputChange('height', e.target.value)}
                       className="bg-white/10 border-white/30 text-white placeholder:text-gray-400 focus:bg-white/20 transition-all duration-300"
-                      placeholder="e.g., 5'8\" or 173cm"
+                      placeholder="e.g., 5'8&quot; or 173cm"
                     />
                   </div>
                   <div className="space-y-2">
