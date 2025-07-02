@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Activity, Heart, Trophy, Zap } from "lucide-react";
+import WorkoutCamera from "@/components/WorkoutCamera";
+import { getIdealScore, evaluatePerformance, getRandomEmailTemplate } from "@/utils/workoutData";
 
 const Index = () => {
   const [formData, setFormData] = useState({
@@ -26,6 +28,8 @@ const Index = () => {
   const [winners, setWinners] = useState<string[]>([]);
   const [showWinnersDialog, setShowWinnersDialog] = useState(false);
   const [celebrationEmojis, setCelebrationEmojis] = useState<{id: number, x: number, y: number}[]>([]);
+  const [showCamera, setShowCamera] = useState(false);
+  const [workoutResults, setWorkoutResults] = useState<{repCount: number, plankDuration: number} | null>(null);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -36,13 +40,42 @@ const Index = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.name || !formData.email || !formData.age || !formData.gender || !formData.workoutChoice) {
+      toast.error("Please fill in all required fields before starting workout.", {
+        duration: 3000,
+        style: {
+          background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+          color: 'white',
+          border: 'none',
+          fontSize: '16px',
+          fontWeight: '600'
+        }
+      });
+      return;
+    }
+
     console.log('Form submitted:', formData);
-    setIsSubmitted(true);
     
-    // Generate random reps between 10-50
-    const totalReps = Math.floor(Math.random() * 41) + 10;
+    // Open camera for workout
+    setShowCamera(true);
+  };
+
+  const handleWorkoutComplete = (repCount: number, plankDuration: number) => {
+    setWorkoutResults({ repCount, plankDuration });
     
-    toast.success(`🎉 Workout data saved successfully. Total Reps: ${totalReps}`, {
+    const age = parseInt(formData.age);
+    const workoutType = getWorkoutTypeNumber(formData.workoutChoice);
+    const score = workoutType === 4 ? plankDuration : repCount;
+    
+    const idealScore = getIdealScore(workoutType, age, formData.gender, formData.experience);
+    const performance = evaluatePerformance(score, idealScore);
+    const emailTemplate = getRandomEmailTemplate(performance, formData.name);
+    
+    const extra = Math.max(0, score - idealScore);
+    
+    // Show workout results
+    toast.success(`🎉 Workout completed! ${workoutType === 4 ? `Plank Duration: ${plankDuration.toFixed(1)}s` : `Total Reps: ${repCount}`}`, {
       duration: 4000,
       style: {
         background: 'linear-gradient(135deg, #10b981, #3b82f6)',
@@ -66,6 +99,18 @@ const Index = () => {
         }
       });
     }, 1000);
+
+    setIsSubmitted(true);
+  };
+
+  const getWorkoutTypeNumber = (workoutChoice: string): number => {
+    const workoutMap: { [key: string]: number } = {
+      'bicepcurls': 1,
+      'squats': 2,
+      'pushups': 3,
+      'plank': 4
+    };
+    return workoutMap[workoutChoice] || 1;
   };
 
   const pickWinner = (e: React.MouseEvent) => {
@@ -129,6 +174,22 @@ const Index = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="text-center space-y-2">
+              {workoutResults && (
+                <div className="bg-white/10 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white mb-2">Your Results:</h3>
+                  {getWorkoutTypeNumber(formData.workoutChoice) === 4 ? (
+                    <p className="text-2xl font-bold text-green-400">
+                      Plank Duration: {workoutResults.plankDuration.toFixed(1)}s
+                    </p>
+                  ) : (
+                    <p className="text-2xl font-bold text-green-400">
+                      Total Reps: {workoutResults.repCount}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
             <Button 
               onClick={() => setIsSubmitted(false)}
               className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300"
@@ -409,6 +470,14 @@ const Index = () => {
             </form>
           </CardContent>
         </Card>
+        
+        {/* Workout Camera Modal */}
+        <WorkoutCamera
+          isOpen={showCamera}
+          onClose={() => setShowCamera(false)}
+          workoutType={getWorkoutTypeNumber(formData.workoutChoice)}
+          onWorkoutComplete={handleWorkoutComplete}
+        />
       </div>
 
       {/* Background Animation Elements */}
