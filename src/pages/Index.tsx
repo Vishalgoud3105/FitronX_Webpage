@@ -5,8 +5,12 @@ import { getIdealScore, evaluatePerformance, getRandomEmailTemplate } from "@/ut
 import HeroSection from "@/components/HeroSection";
 import FitnessForm from "@/components/FitnessForm";
 import SuccessView from "@/components/SuccessView";
+import DailyStatsTable from "@/components/DailyStatsTable";
+import { useWorkoutData } from "@/hooks/useWorkoutData";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
+  const { todaySessions, saveWorkoutSession } = useWorkoutData();
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -26,6 +30,7 @@ const Index = () => {
   const [celebrationEmojis, setCelebrationEmojis] = useState<{id: number, x: number, y: number}[]>([]);
   const [showCamera, setShowCamera] = useState(false);
   const [workoutResults, setWorkoutResults] = useState<{repCount: number, plankDuration: number} | null>(null);
+  const [showDataTable, setShowDataTable] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -57,7 +62,7 @@ const Index = () => {
     setShowCamera(true);
   };
 
-  const handleWorkoutComplete = (repCount: number, plankDuration: number) => {
+  const handleWorkoutComplete = async (repCount: number, plankDuration: number) => {
     setWorkoutResults({ repCount, plankDuration });
     
     const age = parseInt(formData.age);
@@ -70,31 +75,79 @@ const Index = () => {
     
     const extra = Math.max(0, score - idealScore);
     
-    // Show workout results
-    toast.success(`🎉 Workout completed! ${workoutType === 4 ? `Plank Duration: ${plankDuration.toFixed(1)}s` : `Total Reps: ${repCount}`}`, {
-      duration: 4000,
-      style: {
-        background: 'linear-gradient(135deg, #10b981, #3b82f6)',
-        color: 'white',
-        border: 'none',
-        fontSize: '16px',
-        fontWeight: '600'
-      }
-    });
+    // Save to database
+    try {
+      const sessionData = {
+        name: formData.name,
+        age: age,
+        gender: formData.gender,
+        phone_number: formData.phoneNumber || null,
+        email: formData.email,
+        height: formData.height || null,
+        weight: formData.weight || null,
+        workout_type: formData.workoutChoice,
+        experience: formData.experience,
+        rep_count: repCount,
+        plank_duration: plankDuration,
+        ideal_score: idealScore,
+        actual_score: score,
+        performance_rating: performance,
+        extra: extra,
+        session_date: new Date().toISOString().split('T')[0]
+      };
 
-    // Add email notification
-    setTimeout(() => {
-      toast.success(`📧 Email sent successfully!`, {
-        duration: 3000,
+      const savedSession = await saveWorkoutSession(sessionData);
+      
+      // Send email
+      await supabase.functions.invoke('send-workout-email', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          subject: emailTemplate.subject,
+          htmlContent: emailTemplate.body,
+          emailType: 'workout_completion',
+          performanceRating: performance,
+          sessionId: savedSession.id
+        }
+      });
+
+      toast.success(`🎉 Workout completed! ${workoutType === 4 ? `Plank Duration: ${plankDuration.toFixed(1)}s` : `Total Reps: ${repCount}`}`, {
+        duration: 4000,
         style: {
-          background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)',
+          background: 'linear-gradient(135deg, #10b981, #3b82f6)',
           color: 'white',
           border: 'none',
           fontSize: '16px',
           fontWeight: '600'
         }
       });
-    }, 1000);
+
+      setTimeout(() => {
+        toast.success(`📧 Email sent successfully!`, {
+          duration: 3000,
+          style: {
+            background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)',
+            color: 'white',
+            border: 'none',
+            fontSize: '16px',
+            fontWeight: '600'
+          }
+        });
+      }, 1000);
+
+    } catch (error) {
+      console.error('Error saving workout session:', error);
+      toast.error('Failed to save workout data', {
+        duration: 3000,
+        style: {
+          background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+          color: 'white',
+          border: 'none',
+          fontSize: '16px',
+          fontWeight: '600'
+        }
+      });
+    }
 
     setIsSubmitted(true);
   };
@@ -176,6 +229,23 @@ const Index = () => {
 
       {/* Hero Section */}
       <HeroSection currentSection={currentSection} />
+
+      {/* Toggle Button for Data Table */}
+      <div className="max-w-2xl mx-auto mb-4 relative z-10">
+        <button
+          onClick={() => setShowDataTable(!showDataTable)}
+          className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-lg border border-white/20 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300"
+        >
+          {showDataTable ? 'Hide' : 'Show'} Today's Sessions ({todaySessions.length})
+        </button>
+      </div>
+
+      {/* Daily Stats Table */}
+      {showDataTable && (
+        <div className="max-w-7xl mx-auto mb-8 relative z-10">
+          <DailyStatsTable sessions={todaySessions} />
+        </div>
+      )}
 
       {/* Main Form */}
       <FitnessForm
